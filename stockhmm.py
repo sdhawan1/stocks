@@ -71,7 +71,40 @@ class stockhmm(object):
             hashval = statemap[k]
             sumh = sum(hashval)
             hashval = [float(h) / sumh for h in hashval]
-    
+
+
+    #In this function, calculate the optimum amount of money to invest in order to maximize utility.
+    # Inputs: number of state, probability vector, standard deviation, and old share price.
+    def calcutil(stateprobs, sd, oldshareprice):
+        nstates = 7 #this is the value we're going with for now, maybe change later...
+	statetozval = [s-3 for s in range(nstates)]
+	
+	#util fn: logarithmic for (ratio) money loss, linear for money gain? [good for now]
+	#if we're very risk-averse, we can also do logarithmic for money gain
+	investmentvals = [float(money) * i / 8 for i in range(8)]
+	utilities = []
+	for investment in investmentvals:
+		#for each possible investment size, compute the "utility" of making that investment
+		#  based on the possibilities of risk.
+		utility = 0
+		for i in range(nstates):
+			newshareprice = oldshareprice + sd*statetozval[i]
+			moneychgratio = ((self.m - investment) + investment*newshareprice/oldshareprice)/self.m
+			### NOTE: THIS IS WHAT SHOULD BE PASSED BY THE USER: A FUNCTION THAT RETURNS UTIL GIVEN MONEYCHGRATIO ###
+			if moneychgratio < 1:
+				util0 = numpy.log(moneychgratio)
+			else:
+				util0 = moneychgratio				
+			utility += util0*stateprobs[i]
+		
+		utilities += [utility]
+		
+	#find optimum amount to invest and return that.
+	optind = utilities.index(max(utilities))
+	opt_investment = investmentvals[optind]
+	return opt_investment
+
+
 
     #this function should take in one input data point and return a decision on how much money to invest.
     #the "predict_testdataset" function will then buy or sell the necessary shares and update your money.
@@ -83,7 +116,7 @@ class stockhmm(object):
         #  on how much you invest, therefore.
 
         #The util function should return the amount of money I should invest.
-        return self.utilfn(self.m, self.sd, len(stateprob)/2, stateprob)
+        return self.calcutil(stateprob, self.sd, testinput[-1])
 
     def predict_testdataset(testdataset):
         for i in range(self.v, len(testdataset)):
