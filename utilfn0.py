@@ -1,37 +1,62 @@
 
-#create a function that takes in the probabilities of all inputs of the HMM
-#  and generates the monetary investment value that returns the optimal utility
+#create a function that takes in the moneychangeratio, which
+# is the ratio: futuremoney/currentmoney. The output is the
+# utility of the operation that will cause you to end up with
+# the amount "futuremoney".
+#For example, a logarithmic utility function will give zero
+# utility if you don't gain money, and will give you exponenti-
+# ally increasing negative utility if you lose money. As a re-
+# sult, this is a very risk-averse utility function.
 
 import numpy
 
-utilfn(money, nstates, stateprobs, sd, oldshareprice):
-	statetozval = [s-3 for s in range(nstates)]
-	
-	#util fn: logarithmic for (ratio) money loss, linear for money gain? [good for now]
-	#if we're very risk-averse, we can also do logarithmic for money gain
-	investmentvals = [float(money) * i / 8 for i in range(8)]
-	utilities = []
-	for investment in investmentvals:
-		#for each possible investment size, compute the "utility" of making that investment
-		#  based on the possibilities of risk.
-		utility = 0
-		for i in range(nstates):
-			newshareprice = oldshareprice + sd*statetozval[i]
-			moneychgratio = ((money - investment) + investment*newshareprice/oldshareprice)/money
-			### NOTE: THIS IS WHAT SHOULD BE PASSED BY THE USER: A FUNCTION THAT RETURNS UTIL GIVEN MONEYCHGRATIO ###
-			if moneychgratio < 1:
-				util0 = numpy.log(moneychgratio)
-			else:
-				util0 = moneychgratio				
-			utility += util0*stateprobs[i]
+#risk averse: logarithmic for loss, linear for gain.
+"""
+def calcutil0(moneychangeratio):
+	mcr = moneychangeratio
+	if mcr < 1:
+		util0 = numpy.log(mcr)+1
+	else:
+		util0 = mcr
+	return util0
 		
-		utilities += [utility]
-		
-	#find optimum amount to invest and return that.
-	optind = utilities.index(max(utilities))
-	opt_investment = investmentvals[optind]
-	return opt_investment
-	
-	
-	
-	### create new properties files: the qa property file should have url: jdbc:sybase:Tds:vhascqq1db:2641/DQ1_NLS?charset=iso_1
+"""
+
+
+#cubic in gain and loss: averse to heavy risk, loves heavy gain.
+"""
+def calcutil0(moneychangeratio):
+	mcr = moneychangeratio
+	util0 = (mcr-1)**3
+	return util0
+"""
+
+#risk loving: exponential for gain, linear for loss. This will
+#  approximate the actual market much more closely.
+"""
+def calcutil0(moneychangeratio):
+	mcr = moneychangeratio
+	if mcr < 1:
+		util0 = mcr
+	else:
+		util0 = 2**mcr-1
+	return util0
+"""
+
+
+#exprisk: loves risk even more than the risk-loving model.
+# surprisingly it is about the same as the risk-loving; even
+# doing worse over the very long term. Perhaps avoiding some risk is
+# very important.
+"""
+def calcutil0(moneychangeratio):
+	mcr = moneychangeratio
+	util0 = 2**mcr-1
+	return util0
+"""
+
+#linear: the model that filters the HMM least
+def calcutil0(moneychangeratio):
+	mcr = moneychangeratio
+	util0 = mcr
+	return util0

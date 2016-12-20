@@ -13,18 +13,7 @@
 
 import numpy
 import csv
+from plotresults import plotresults
 
-#start out by retrieving data for one stock and running some tests on it.
-f = open("data/aapl_2yrs.csv")
-aapl = list(csv.reader(f))
-colnames = aapl[0]
-aapl = aapl[2:]
-
-
-#if we were to use a markov model, we would invest when we thought the price was
-#  likely to increase, and we would sell when we thought it was likely to decrease.
-
-
-
-
-
+#try to call the "plotresults" file.
+plotresults("T", "out.txt")

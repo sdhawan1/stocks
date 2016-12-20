@@ -59,12 +59,13 @@ class stockhmm(object):
 		#	altzstrdata.count(3), altzstrdata.count(4), altzstrdata.count(5), altzstrdata.count(6))
 		
 		
-		#the statemap's input should be every possible combination of five states (sorted)
+		#the statemap's input should be every possible combination of five states
 		#iterate through the training data and store data in the statemap
+		# NOTE: WE DO NOT SORT THE INPUTS HERE - WANT TO TRY PERMUTATIONS FOR MORE ACCURACY.
 		for i in range(self.v, len(altzstrdata)):
 			state = altzstrdata[i]
 			input0 = altzstrdata[i-self.v:i]
-			input0.sort()
+			#input0.sort()
 			hashinput = str(input0)
 			#insert into hashtable
 			if hashinput in self.statemap.keys():
@@ -86,7 +87,7 @@ class stockhmm(object):
 	
 	#this function should calculate the "alternate state" for just a single data point.
 	# recall that these states are computed based on what percentile of the data the value
-	# lands in.
+	# lies in.
 	def altsinglestatecalc(self, trdiff):
 		t=trdiff
 		if t < self.stdivs[0]:
@@ -152,8 +153,7 @@ class stockhmm(object):
 	def calcutil(self, stateprobs, sd, oldshareprice):
 		nstates = 7 #this is the value we're going with for now, maybe change later...
 		
-		#util fn: logarithmic for (ratio) money loss, linear for money gain? [good for now]
-		#if we're very risk-averse, we can also do logarithmic for money gain
+		#util fn: "calcutil0" provided by the user.
 		investmentvals = [float(self.m) * i / 8 for i in range(9)] #potential investment "tiers"
 		utilities = []
 		for investment in investmentvals:
@@ -187,7 +187,7 @@ class stockhmm(object):
     #this function should take in one input data point and return a decision on how much money to invest.
     #the "predict_testdataset" function will then buy or sell the necessary shares and update your money.
 	def predict_testinput(self, altzsinput, testdataval):
-		altzsinput.sort()
+		#altzsinput.sort()
 		hashinput = str(altzsinput)
 		if hashinput in self.statemap.keys():
 			stateprob = self.statemap[hashinput]
