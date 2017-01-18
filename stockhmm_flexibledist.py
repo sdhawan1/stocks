@@ -1,16 +1,11 @@
 
 ## Create an hmm model for the purpose of making investment decisions.
 
-#Current findings: the algorithm has very high performance. It makes dramatic
-#   gains in stock price, even over periods where the stock it's tracking went down.
-#Next steps: perform more testing & adjust the algorithm. Also add to write up (talk about k-fold crossval).
-#  change the algorithm so that the order of state changes matters.
-#  change the algorithm's "util0" function and perform more tests.
-
 import numpy
 import csv
 import math
 from plotresults import plotresults
+#This function should be flexible, based on what kind of optimization we want.
 from utilfn0 import calcutil0
 
 class stockhmm(object):
@@ -21,10 +16,8 @@ class stockhmm(object):
 	statemap = {}
 	stdivs = []
 	avgstatechange = []
-	#FIGURE OUT HOW TO ADD FUNCTION "UTILFN"
-
+	
 	#initially, we should set "trdata" equal to a full list of closing prices only.
-	#"utilfn" = the utility function we want for our data [INCLUDE THIS LATER].
 	def __init__(self, smoothness, visibility, trdata, money):
 		#input basic tests after I learn exception handling
 
@@ -47,7 +40,7 @@ class stockhmm(object):
 		trdata = moddata
 		
 		#===========================================================================#
-		### WARNING: THIS MAY BE A FORM OF OVERFITTING! [TR DISTRIBUTION != TEST DIST.]
+		### WARNING: THIS MAY BE A FORM OF OVERFITTING [TR DISTRIBUTION != TEST DIST.]
 		#Create an alternate method to compute zscoretrdata, which we know will be equitable,
 		# in spite of the specific distribution of the training data.
 		altzstrdata = self.altstatecalc(trdata)
@@ -137,15 +130,6 @@ class stockhmm(object):
 		#print self.avgstatechange
 				
 		
-		
-	#IDEA FOR CHANGING THE BELOW FUNCTION: LET'S USE THE BINOMIAL DISTRIBUTION CDF TO COMPUTE
-	#  THE PROBABILITY THAT INVESTING IN THIS STOCK REPEATEDLY WILL RESULT IN AT LEAST A SMALL GAIN.	
-	#how to do this: calculate the expected amount lost from a loss; compute the expected amount
-	#  gained from a gain, and multiply by the respective gain/loss probability to get the
-	#  expected / adjusted gain/loss. Use this, plus the probability of the given outcome
-	#  (from which we can guess the total number of occurrences in the future) to find the 
-	#  probability of a slight gain (at least); this should be found using the Binomial CDF.
-	#  If the result of the CDF is higher than a certain threshold, make an investment.
 
     #In this function, calculate the optimum amount of money to invest in order to maximize utility.
     # Inputs: number of state, probability vector, standard deviation, and old share price.
@@ -165,7 +149,7 @@ class stockhmm(object):
 				newshareprice = oldshareprice + self.avgstatechange[i]
 				moneychgratio = ((self.m - investment) + investment*newshareprice/oldshareprice)/self.m
 				
-				### NOTE: THIS IS WHAT SHOULD BE PASSED BY THE USER: A FUNCTION THAT RETURNS UTIL GIVEN MONEYCHGRATIO ###
+				#the calcutil0 function is provided by the user: assigns utility to moneychageratio.
 				util0 = calcutil0(moneychgratio)
 					
 				utility += util0*stateprobs[i]
@@ -195,10 +179,7 @@ class stockhmm(object):
 			#if there is no entry in the hashtable close to the current state, then assume
 			#  that everything has an equal chance of happening.
 			stateprob = [float(1)/7]*7
-        #eventually, I should be solving an equation to find the optimum amount to invest to increase my
-        #  utility should be a function of how much *money* you stand to lose or gain. It should vary depending
-        #  on how much you invest, therefore.
-
+        
         #The util function should return the amount of money I should invest.
 		return self.calcutil(stateprob, self.sd, testdataval)
 
